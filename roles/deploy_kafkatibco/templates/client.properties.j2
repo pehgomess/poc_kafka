@@ -1,9 +1,9 @@
 security.protocol=SSL
-ssl.truststore.location={{ certificates }}client.truststore.jks
-ssl.truststore.password=test1234
+ssl.truststore.location={{ certificates }}/client.truststore.jks
+ssl.truststore.password={{ passcert }}
 ssl.keystore.location={{ certificates }}/client.keystore.jks
-ssl.keystore.password=test1234
-ssl.key.password=test1234
+ssl.keystore.password={{ passcert }}
+ssl.key.password={{ passcert }}
 ssl.enabled.protocols=TLSv1.2,TLSv1.1,TLSv1
 ssl.truststore.type=JKS
 ssl.keystore.type=JKS

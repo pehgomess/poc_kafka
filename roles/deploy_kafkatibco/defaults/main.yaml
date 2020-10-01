@@ -3,7 +3,7 @@ appuser: kafka
 appgrp: kafka
 install_dir: /opt/tibco
 log_zookeeper_dir: /var/log/zookeeper
-apps_zookeeper_dir: /apps/zookeeper
+apps_zookeeper_dir: /opt/zookeeper
 apps_kafka_dir: /opt/kafka
 log_kafka_dir: /var/log/kafka
 config_dir: /opt/tibco/akd/core/2.5/config
@@ -15,3 +15,5 @@ kafkaprometheus: kafka-2_0_0.yml
 partitions: 1
 replication: 3
 topicname: POC
+passcert: test1234
+domain: labdomain.corp

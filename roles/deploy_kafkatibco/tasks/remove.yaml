@@ -2,8 +2,8 @@
   become: true
   command: "{{ item }}"
   with_items:
-    - "keytool -delete -alias CARoot -keystore {{ certdir_create }}/server.truststore.jks -storepass test1234"
-    - "keytool -delete -alias CARoot -keystore {{ certdir_create }}/client.truststore.jks -storepass test1234"
+    - "keytool -delete -alias caroot -keystore {{ certdir_create }}/server.truststore.jks -storepass test1234"
+    - "keytool -delete -alias caroot -keystore {{ certdir_create }}/client.truststore.jks -storepass test1234"
     - "keytool -delete -alias localhost -keystore {{ certdir_create }}/server.keystore.jks -storepass test1234"
     - "keytool -delete -alias localhost -keystore {{ certdir_create }}/client.keystore.jks -storepass test1234"
   ignore_errors: True 
@@ -37,7 +37,7 @@
     daemon_reload: yes
   ignore_errors: true 
 
-- name: Remove dir kafka
+- name: Remove dir and files
   file:
     path: "{{ item }}"
     state: absent
@@ -48,13 +48,9 @@
     - "{{ apps_kafka_dir }}"
     - "{{ log_kafka_dir }}"
     - "{{ certdir_create }}*"
-    
-- name: remove systemd file
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
+    - /tmp/certs.tar.gz
+    - /tmp/createtopic.sh
     - /etc/systemd/system/kafka.service
     - /etc/systemd/system/zookeeper.service
-  
+ 
   

@@ -18,8 +18,18 @@
   command: python createcert.py
   args:
     chdir: "{{ certdir_create }}"
+  async: 5
+  poll: 0
+  register: out
   when: inventory_hostname in groups['kafka'][0]
 
+- debug: var=out.stdout_lines
+  when: inventory_hostname in groups['kafka'][0]
+  
+- name: Aguardando a execucao do Certificado
+  pause:  
+#    seconds: 5
+  
 - name: tar cert
   archive:
     path: "{{ certdir_create }}"

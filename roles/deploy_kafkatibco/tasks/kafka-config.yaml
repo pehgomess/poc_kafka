@@ -94,17 +94,18 @@
   with_items:
     - "{{ apps_kafka_dir }}"
     - "{{ log_kafka_dir }}"
+    - "{{ install_dir }}"
 
 - name: systemd reload
   systemd:
     daemon_reload: yes
   when: inventory_hostname in groups['kafka']
 
-#- name: restart_kafka
-#  systemd:
-#    name: kafka.service
-#    state: restarted
-#  when: inventory_hostname in groups['kafka']
+- name: restart_kafka
+  systemd:
+    name: kafka.service
+    state: restarted
+  when: inventory_hostname in groups['kafka']
 
 #- name: enable_kafka
 #  systemd:
@@ -119,26 +120,27 @@
     dest: /tmp/createtopic.sh
   when: inventory_hostname in groups['kafka'][0]
 
-#- name: Give permissions script file
-#  file:
-#    path: /tmp/createtopic.sh
-#    owner: "{{ appuser }}"
-#    group: "{{ appgrp }}"
-#    mode: '0755'
-#  when: inventory_hostname in groups['kafka'][0]
+- name: Give permissions script file
+  file:
+    path: /tmp/createtopic.sh
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    mode: '0755'
+  when: inventory_hostname in groups['kafka'][0]
 
-#- name: Create Topic
-#  become: true
-#  command: sh /tmp/createtopic.sh create
-#  when: inventory_hostname in groups['kafka'][0]
+- name: Create Topic
+  become: true
+  command: sh /tmp/createtopic.sh create
+  when: inventory_hostname in groups['kafka'][0]
 
-#- name: create topic 
-#  pause:  
+- name: create topic 
+  pause:  
 
-#- name: Validate Topic
-#  become: true
-#  command: sh /tmp/createtopic.sh validar
-#  when: inventory_hostname in groups['kafka'][0]
+- name: Validate Topic
+  become: true
+  command: sh /tmp/createtopic.sh validar
+  register: val
+  when: inventory_hostname in groups['kafka'][0]
 
-#- name: Validate topic 
-#  pause:  
+- debug: var=val.stdout_lines
+  when: inventory_hostname in groups['kafka'][0]
