@@ -1,0 +1,60 @@
+- name: Remove Certs da keystore
+  become: true
+  command: "{{ item }}"
+  with_items:
+    - "keytool -delete -alias CARoot -keystore {{ certdir_create }}/server.truststore.jks -storepass test1234"
+    - "keytool -delete -alias CARoot -keystore {{ certdir_create }}/client.truststore.jks -storepass test1234"
+    - "keytool -delete -alias localhost -keystore {{ certdir_create }}/server.keystore.jks -storepass test1234"
+    - "keytool -delete -alias localhost -keystore {{ certdir_create }}/client.keystore.jks -storepass test1234"
+  ignore_errors: True 
+  
+- name: disable_kafka
+  systemd:
+    name: kafka.service
+    enabled: no
+  ignore_errors: true
+
+- name: disable_zookeeper
+  systemd:
+    name: zookeeper.service
+    enabled: no
+  ignore_errors: true 
+
+- name: stop kafka
+  systemd:
+    name: kafka.service
+    state: stopped
+  ignore_errors: true 
+
+- name: stop zookeeper
+  systemd:
+    name: zookeeper.service
+    state: stopped
+  ignore_errors: true 
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+  ignore_errors: true 
+
+- name: Remove dir kafka
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ install_dir }}"
+    - "{{ log_zookeeper_dir }}"
+    - "{{ apps_zookeeper_dir }}"
+    - "{{ apps_kafka_dir }}"
+    - "{{ log_kafka_dir }}"
+    - "{{ certdir_create }}*"
+    
+- name: remove systemd file
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/systemd/system/kafka.service
+    - /etc/systemd/system/zookeeper.service
+  
+  

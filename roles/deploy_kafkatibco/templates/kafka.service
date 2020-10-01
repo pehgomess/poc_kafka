@@ -1,0 +1,16 @@
+[Unit]
+After=network.target remote-fs.target
+Requires=zookeeper.service
+
+[Service]
+Type=simple
+User=kafka
+Environment='KAFKA_OPTS=-Dkafka.logs.dir=/var/log/kafka'
+Environment="EXTRA_ARGS=-javaagent:/opt/kafka/jmx_prometheus_javaagent-0.12.0.jar=8081:/opt/kafka/kafka-2_0_0.yml"
+ExecStart=/bin/sh -c '/opt/tibco/akd/core/2.5/bin/kafka-server-start.sh /opt/tibco/akd/core/2.5/config/server.properties > /var/log/kafka/kafka.log 2>&1'
+ExecStop=/opt/tibco/akd/core/2.5/bin/kafka-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+

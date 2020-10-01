@@ -1,0 +1,17 @@
+tibico_version: TIB_msg-akd-core_2.5.1_linux_x86_64
+appuser: kafka
+appgrp: kafka
+install_dir: /opt/tibco
+log_zookeeper_dir: /var/log/zookeeper
+apps_zookeeper_dir: /apps/zookeeper
+apps_kafka_dir: /opt/kafka
+log_kafka_dir: /var/log/kafka
+config_dir: /opt/tibco/akd/core/2.5/config
+core_dir: /opt/tibco/akd/core/2.5
+certdir_create: /tmp/certs
+certificates: /opt/tibco/akd/core/2.5/config/certificates
+jmxprometheus: jmx_prometheus_javaagent-0.12.0.jar
+kafkaprometheus: kafka-2_0_0.yml
+partitions: 1
+replication: 3
+topicname: POC

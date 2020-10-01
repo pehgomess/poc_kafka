@@ -1,0 +1,37 @@
+- name: Create {{ certdir_create }}
+  become: true
+  file: 
+    path: "{{ certdir_create }}"
+    mode: 0750
+    state: directory
+  when: inventory_hostname in groups['kafka'][0]
+
+- name: Copy script tls generation
+  become: true
+  template:
+    src: createcert.py.j2
+    dest: "{{ certdir_create }}/createcert.py"
+  when: inventory_hostname in groups['kafka'][0]
+
+- name: Generate Cert 
+  become: true
+  command: python3 createcert.py
+  args:
+    chdir: "{{ certdir_create }}"
+  when: inventory_hostname in groups['kafka'][0]
+
+- name: tar cert
+  archive:
+    path: "{{ certdir_create }}"
+    dest: /tmp/certs.tar.gz
+    format: gz
+  when: inventory_hostname in groups['kafka'][0]
+
+- name: Storing tar in ansible host tmp
+  fetch:
+    src: /tmp/certs.tar.gz
+    dest: "/tmp/"
+    flat: yes
+  when: inventory_hostname in groups['kafka'][0]
+
+- include: zookeeper-config.yaml

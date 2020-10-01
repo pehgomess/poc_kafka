@@ -1,0 +1,18 @@
+#!/bin/bash
+
+case $1 in 
+
+    create)
+        if [ $(cat {{ config_dir }}/server.properties | grep broker.id) == "broker.id=1" ] ; then
+
+        sh {{ core_dir }}/bin/kafka-topics.sh --create --bootstrap-server "{{ groups['kafka'][0] }}:9092" --partitions {{ partitions }} --replication-factor {{ replication }} --topic {{ topicname }}
+
+        else
+
+            echo "Error: para criar o topic"
+        fi
+    ;;
+    validar)
+        sh {{ core_dir }}/bin/kafka-topics.sh --list --bootstrap-server "{{ groups['kafka'][0] }}:9092" 
+    ;;
+esac

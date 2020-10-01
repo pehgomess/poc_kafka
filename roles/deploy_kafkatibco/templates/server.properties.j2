@@ -1,0 +1,29 @@
+# Cada broker tem um ID diferente
+broker.id={{ myid }}
+
+listeners=PLAINTEXT://{{ vars.ansible_nodename }}:9092,SSL://{{ vars.ansible_nodename }}:9093
+log.dirs={{ apps_kafka_dir }}
+log.retention.hours=24
+log.retention.check.internal.ms=300000
+{% set port = '2128' %}
+{% set server_zk = [] %}
+{% for zk in groups['kafka'] %}
+{{ server_zk.append( zk+":"+port ) }}
+{% endfor %}
+zookeeper.connect={{ server_zk|join(',') }}
+delete.topic.enable=true
+
+# SSL
+ssl.enable.protocols=TLSv1.2,TLSv1.1,TLSv1
+ssl.keystore.location=/opt/tibco/akd/core/2.5/config/certificates/server.keystore.jks
+ssl.keystore.password=test1234
+ssl.key.password=test1234
+ssl.truststore.location=/opt/tibco/akd/core/2.5/config/certificates/server.truststore.jks
+ssl.truststore.password=test1234
+
+ssl.client.auth=required
+ssl.endpoint.identification.algorithm=
+ssl.keystore.type=JKS
+ssl.truststore.type=JKS
+ssl.secure.random.implementation=SqHA1PRNG
+security.inter.broker.protocol=SSL

@@ -1,0 +1,15 @@
+[Unit]
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target
+
+[Service]
+Type=simple
+User=kafka
+Environment='KAFKA_OPTS=-Dkafka.logs.dir=/var/log/zookeeper'
+ExecStart=/opt/tibco/akd/core/2.5/bin/zookeeper-server-start.sh /opt/tibco/akd/core/2.5/config/zookeeper.properties
+ExecStop=/opt/tibco/akd/core/2.5/bin/zookeeper-server-stop.sh
+Restart=on-abnormal
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,11 @@
+cattickTime=2000
+dataDir={{ apps_zookeeper_dir }}/
+clientPort=2181
+initLimit=5
+syncLimit=2
+{% for server in groups['kafka'] %}
+server.{{ hostvars[server].myid }}={{ server }}:2888:3888
+{% endfor %}
+autopurge.snapRetainCount=3
+autopurge.purgeInterval=24
+4lw.commands.whitelist=stat, ruok, conf, isro

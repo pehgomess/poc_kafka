@@ -1,0 +1,24 @@
+import telnetlib
+import sys
+import os 
+
+host = ["{{ vars.ansible_nodename }}"]
+PORT = 2181
+
+def ruoktest (HOST):
+    try:
+        t = telnetlib.Telnet(HOST,PORT)
+        t.write("ruok\n")
+        retorno = t.read_until("imok",3)
+        if "imok" not in retorno:
+            raise Exception("Err: Nao achei meu imok")
+        print (retorno + " - Running Zookeeper - Test Host: " + HOST)
+    except:
+        print("Err: para conectar no " + HOST +" e na porta " + PORT)
+
+for i in (host):
+    try:
+        t = telnetlib.Telnet(i, PORT)
+        ruoktest (i)
+    except:
+        pass

@@ -1,0 +1,87 @@
+- name: Create "{{ log_zookeeper_dir }}"
+  become: true
+  file: 
+    path: "{{ log_zookeeper_dir }}"
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    state: directory
+  when: inventory_hostname in groups['kafka']
+
+- name: Create "{{ apps_zookeeper_dir }}"
+  become: true
+  file: 
+    path: "{{ apps_zookeeper_dir }}"
+    state: directory
+  when: inventory_hostname in groups['kafka']
+
+- name: Create zookeeper myid 
+  become: true
+  copy:
+    content: "{{ myid }}"
+    dest: "{{ apps_zookeeper_dir }}/myid"
+  when: inventory_hostname in groups['kafka']
+
+- name: Copy zookeeper properties
+  become: true
+  template:
+    src: zookeeper.properties.j2
+    dest: "{{ config_dir }}/zookeeper.properties"
+  when: inventory_hostname in groups['kafka']
+
+- name: Copy zookeeper properties
+  become: true
+  template:
+    src: zookeeper.service
+    dest: /etc/systemd/system/
+  when: inventory_hostname in groups['kafka']
+
+- name: Update Permission Install Dir
+  become: true
+  file: 
+    path: "{{ item }}"
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    recurse: yes
+    state: directory
+  with_items:
+    - "{{ apps_zookeeper_dir }}"
+    - "{{ log_zookeeper_dir }}"
+
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+  when: inventory_hostname in groups['kafka']
+
+- name: restart_zookeeper
+  systemd:
+    name: zookeeper.service
+    state: restarted
+  when: inventory_hostname in groups['kafka']
+
+- name: enable_zookeeper
+  systemd:
+    name: zookeeper.service
+    enabled: yes
+  when: inventory_hostname in groups['kafka']
+
+#- name: ruok test kafka servers
+#- name: Copy script test ruok
+#  become: true
+#  template:
+#    src: ruoktest.py.j2
+#    dest: /tmp/ruoktest.py
+#  when: inventory_hostname in groups['kafka'][0]
+
+#- name: ruok test 
+#  pause:  
+
+#- name: Running test zookeeper
+#  become: true
+#  command: python3 /tmp/ruoktest.py
+#  args:
+#  when: inventory_hostname in groups['kafka'][0]
+
+- name:
+  pause:  
+
+- include: kafka-config.yaml
