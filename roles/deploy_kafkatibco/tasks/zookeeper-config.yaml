@@ -77,7 +77,7 @@
 
 #- name: Running test zookeeper
 #  become: true
-#  command: python3 /tmp/ruoktest.py
+#  command: python /tmp/ruoktest.py
 #  args:
 #  when: inventory_hostname in groups['kafka'][0]
 

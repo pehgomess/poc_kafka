@@ -15,7 +15,7 @@
 
 - name: Generate Cert 
   become: true
-  command: python3 createcert.py
+  command: python createcert.py
   args:
     chdir: "{{ certdir_create }}"
   when: inventory_hostname in groups['kafka'][0]

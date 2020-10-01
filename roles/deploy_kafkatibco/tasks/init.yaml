@@ -1,27 +1,11 @@
 ---
-- name: Deps
-  copy:
-    src: "files/{{ item }}"
-    dest: "/tmp/"
-  with_items:
-    - python36-pexpect-4.8.0-1.el7.noarch.rpm
-    - python3-3.6.8-13.el7.x86_64.rpm
-    - python3-libs-3.6.8-13.el7.x86_64.rpm
-    - python3-pip-9.0.3-7.el7_7.noarch.rpm
-    - libtirpc-0.2.4-0.16.el7.x86_64.rpm
-    - python3-setuptools-39.2.0-10.el7.noarch.rpm
-    - python36-ptyprocess-0.5.1-7.el7.noarch.rpm
-
-
 - name: Install packages
   yum:
     name: "{{ packages }}"
   vars:
     packages:
       - java-1.8.0-openjdk.x86_64
-      - /tmp/python3-3.6.8-13.el7.x86_64.rpm
-      - /tmp/python36-ptyprocess-0.5.1-7.el7.noarch.rpm
-      - /tmp/python36-pexpect-4.8.0-1.el7.noarch.rpm
+      - pexpect
 
 - name: Create group
   group:
