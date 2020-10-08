@@ -12,13 +12,13 @@ Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do re
 - Importante que as maquinas possuem entradas no hosts, adicionar o dominio tambem para a POC.
 
     - Ex arquivo /etc/hosts. 
-    
+    ```
     127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
     IP-NODE1	kafka1.labdomain.corp
     IP-NODE2	kafka2.labdomain.corp
     IP-NODE3	kafka3.labdomain.corp
-
-    **O nome do dominio deve ser o mesmo do arquivo main.yaml do diretorio defaults do ansible**
+    ```
+    **O nome do dominio deve ser o mesmo do arquivo main.yaml do diretorio [defaults](deploy_kafkatibco/defaults) do ansible**
 
 ### Configuração inicial: 
 
@@ -44,9 +44,10 @@ Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do re
 1. Para executar o ansible executar o script shell com o nome `kafkainstall.sh`, rode sem opção que ele mostra as opções.
 
     Opções: 
+        ```
         `sh kafkainstall.sh deploy` -> instala o kafka com certificado (servidores da lista do \[broker]\)
         `sh kafkainstall.sh remove` -> remove tudo (remove todos relacionado a zookeeper e a tibico)
         `sh kafkainstall.sh scale_out` -> cria uma outra instancia do kafka em outro servidor na lista do inventario \[scale_out\] 
         `sh kafkainstall.sh restart` -> systemctl restart zookeeper e kafka
-
-    Se quiser um modo debug rodar o script e adicionar o -vv ou -vvv ao final do comando
+        ```
+    **Se quiser um modo debug rodar o script e adicionar o -vv ou -vvv ao final do comando**
