@@ -1,0 +1,13 @@
+- name: restart_zookeeper
+  systemd:
+    name: zookeeper.service
+    state: restarted
+  when: inventory_hostname in groups['scale_out'] or inventory_hostname in groups['kafka'] 
+  ignore_errors: true
+
+- name: restart_kafka
+  systemd:
+    name: kafka.service
+    state: restarted
+  when: inventory_hostname in groups['scale_out'] or inventory_hostname in groups['kafka'] 
+  ignore_errors: true

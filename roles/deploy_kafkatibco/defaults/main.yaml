@@ -16,4 +16,4 @@ partitions: 1
 replication: 3
 topicname: POC
 passcert: test1234
-domain: labdomain.corp
+domain: labdomain.com.br

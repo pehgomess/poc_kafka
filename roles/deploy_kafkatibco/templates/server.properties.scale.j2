@@ -10,7 +10,12 @@ log.retention.check.internal.ms=300000
 {% for zk in groups['kafka'] %}
 {{ server_zk.append( zk+":"+port ) }}
 {% endfor %}
-zookeeper.connect={{ server_zk|join(',') }}
+{% set port = '2181' %}
+{% set server_so = [] %}
+{% for so in groups['scale_out'] %}
+{{ server_so.append( so+":"+port ) }}
+{% endfor %}
+zookeeper.connect={{ server_zk|join(',') }},{{ server_so|join(',') }} 
 delete.topic.enable=true
 
 # SSL

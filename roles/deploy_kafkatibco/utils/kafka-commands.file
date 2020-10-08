@@ -1,0 +1,13 @@
+#SSL Test
+bin/kafka-console-producer.sh --broker-list kafka1.labdomain.com.br:9093 --topic POC --producer.config config/client.properties
+
+
+#Validar
+bin/kafka-console-consumer.sh --bootstrap-server kafka1.labdomain.com.br:9093 --topic POC --consumer.config config/client.properties
+
+##Testes com envio de msgs
+bin/kafka-producer-perf-test.sh --topic POC --num-records 5000 --record-size 100 --throughput -1 --producer-props acks=1 bootstrap.servers=kafka1.labdomain.com.br:9093 batch.size=9900 --producer.config config/client.properties
+
+#Validar
+bin/kafka-console-consumer.sh --bootstrap-server kafka1.labdomain.com.br:9093 --topic POC --from-beginning --max-messages 5000 --consumer.config config/client.properties
+

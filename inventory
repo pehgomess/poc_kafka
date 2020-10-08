@@ -1,0 +1,14 @@
+[all:vars]
+ansible_ssh_user=root
+ansible_ssh_private_key_file=~/.ssh/kafka.pub
+
+[kafka]
+kafka1.labdomain.com.br myid=1
+kafka2.labdomain.com.br myid=2
+kafka3.labdomain.com.br myid=3
+
+[client]
+kafka1.labdomain.com.br
+
+[scale_out]
+lb.labdomain.com.br myid=4

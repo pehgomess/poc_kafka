@@ -1,0 +1,230 @@
+---
+- name: Install packages
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - java-1.8.0-openjdk.x86_64
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create group
+  group:
+    name: "{{ appgrp }}"
+    state: present
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create user 
+  user:
+    name: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    state: present
+  when: inventory_hostname in groups['scale_out']
+
+- name: Copy Kafka Tibico - {{ tibico_version }}
+  copy:
+    src: "files/{{ tibico_version }}.tar.gz"
+    dest: "/tmp/"
+  when: inventory_hostname in groups['scale_out']
+
+- name: Extract Kafka tibico to "{{ install_dir }}"
+  become: true
+  unarchive:
+    src: /tmp/{{ tibico_version }}.tar.gz
+    dest: "/opt/"
+    copy: no
+  when: inventory_hostname in groups['scale_out']
+
+- name: Move Dir /opt/tibico
+  become: true
+  command: cp -r '/opt/{{ tibico_version }}/opt/tibco/.' '/opt/tibco'
+  when: inventory_hostname in groups['scale_out']
+
+- name: Remove Existing Tarball
+  become: true
+  file:
+    state: absent
+    path: /tmp/{{ tibico_version }}.tar.gz
+  when: inventory_hostname in groups['scale_out']
+
+- name: Remove Existing Tarball
+  become: true
+  file:
+    state: absent
+    path: '/opt/{{ tibico_version }}'
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create "{{ log_kafka_dir }}"
+  become: true
+  file: 
+    path: "{{ log_kafka_dir }}"
+    mode: 0750
+    state: directory
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create "{{ apps_kafka_dir }}"
+  become: true
+  file: 
+    path: "{{ apps_kafka_dir }}"
+    mode: 0750
+    state: directory
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create "{{ certificates }}"
+  become: true
+  file: 
+    path: "{{ certificates }}"
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    state: directory
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create "{{ log_zookeeper_dir }}"
+  become: true
+  file: 
+    path: "{{ log_zookeeper_dir }}"
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    state: directory
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create "{{ apps_zookeeper_dir }}"
+  become: true
+  file: 
+    path: "{{ apps_zookeeper_dir }}"
+    state: directory
+  when: inventory_hostname in groups['scale_out']
+
+- name: Create zookeeper myid 
+  become: true
+  copy:
+    content: "{{ myid }}"
+    dest: "{{ apps_zookeeper_dir }}/myid"
+  when: inventory_hostname in groups['scale_out'] 
+
+- name: Copy zookeeper properties
+  become: true
+  template:
+    src: zookeeper.properties.scale.j2
+    dest: "{{ config_dir }}/zookeeper.properties"
+  when: inventory_hostname in groups['scale_out'] or inventory_hostname in groups['kafka']
+
+- name: Copy zookeeper properties
+  become: true
+  template:
+    src: zookeeper.service
+    dest: /etc/systemd/system/
+  when: inventory_hostname in groups['scale_out']
+
+- name: Update Permission Install Dir
+  become: true
+  file: 
+    path: "{{ item }}"
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    recurse: yes
+    state: directory
+  with_items:
+    - "{{ apps_zookeeper_dir }}"
+    - "{{ log_zookeeper_dir }}"
+  when: inventory_hostname in groups['scale_out']    
+
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+  when: inventory_hostname in groups['scale_out']
+
+- name: restart_zookeeper
+  systemd:
+    name: zookeeper.service
+    state: restarted
+  when: inventory_hostname in groups['scale_out']
+
+- name: enable_zookeeper
+  systemd:
+    name: zookeeper.service
+    enabled: yes
+  when: inventory_hostname in groups['scale_out']
+
+- name: Copy server properties
+  become: true
+  template:
+    src: server.properties.scale.j2
+    dest: "{{ config_dir }}/server.properties"
+  when: inventory_hostname in groups['scale_out'] or inventory_hostname in groups['kafka'] 
+
+- name: Copy client properties
+  become: true
+  template:
+    src: client.properties.j2
+    dest: "{{ config_dir }}/client.properties"
+  when: inventory_hostname in groups['scale_out']
+  
+- name: Copy Certs
+  become: true
+  fetch:
+    src:  "{{ certificates }}/{{ item }}"
+    dest: "/tmp/"
+    flat: yes
+  with_items:
+    - server.keystore.jks
+    - server.truststore.jks
+  when: inventory_hostname in groups['kafka'][0]
+
+- name: Extract certs
+  become: true
+  copy:
+    src:  "/tmp/{{ item }}"
+    dest: "{{ certificates }}/{{ item }}"
+  with_items:
+    - server.keystore.jks
+    - server.truststore.jks
+  when: inventory_hostname in groups['scale_out']
+
+- name: Copy kafka service
+  become: true
+  template:
+    src: kafka.service
+    dest: /etc/systemd/system/
+  when: inventory_hostname in groups['scale_out']
+
+- name: Copy jmx for prometheus
+  copy:
+    src: "../files/{{ jmxprometheus }}"
+    dest: "{{ apps_kafka_dir }}"
+  when: inventory_hostname in groups['scale_out']
+
+- name: Copy kafka template for prometheus
+  copy:
+    src: "../files/{{ kafkaprometheus }}"
+    dest: "{{ apps_kafka_dir }}"
+  when: inventory_hostname in groups['scale_out']
+
+- name: Update Permission Install Dir
+  become: true
+  file: 
+    path: "{{ item }}"
+    owner: "{{ appuser }}"
+    group: "{{ appgrp }}"
+    recurse: yes
+    state: directory
+  with_items:
+    - "{{ apps_kafka_dir }}"
+    - "{{ log_kafka_dir }}"
+    - "{{ install_dir }}"
+
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+  when: inventory_hostname in groups['scale_out']
+
+#- name: restart_kafka
+#  systemd:
+#    name: kafka.service
+#    state: restarted
+#  when: inventory_hostname in groups['scale_out']
+
+#- name: enable_kafka
+#  systemd:
+#    name: kafka.service
+#    enabled: yes
+#  when: inventory_hostname in groups['kafka']

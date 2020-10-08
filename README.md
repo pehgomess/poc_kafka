@@ -1,38 +1,51 @@
-Instalacao do kafka tibco via ansible
+# Automacão dos testes realizados para a POC com Kafka
 
-kafka1
-kafka2
-kafka3
+Automacao da instalação do kafka com TLS padrão com 3 brokers e possibilidade de efetuar um crescimento horizontal escalando mais instâncias.
+Também foi desenvolvido scripts para remoção do ambiente para efetuar novamente a instalação caso necessário.
 
+### Requisitos soft:
 
-para a POC.
+Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do repositorio com o pacote, em caso de problemas no ansible validar com o time de infraestrutura o responsavel pela ambiente (servidor), se quiser validar executar o comando abaixo
 
+    yum search java-1.8.0-openjdk
+    
+- Importante que as maquinas possuem entradas no hosts, adicionar o dominio tambem para a POC.
 
-hosts - arquivo de inventario que contem a lista dos servidores do broker (kafka) e o client
+    Ex arquivo /etc/hosts. 
+    `127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4`
+    `IP-NODE1	kafka1.labdomain.corp`
+    `IP-NODE2	kafka2.labdomain.corp`
+    `IP-NODE3	kafka3.labdomain.corp`
 
-para gerar o producer via SSL, foi configurado o client sendo o primeiro servidor do kafka, entao o teste usando o utilitario do kafka pode ser \
-realizado por este server, sendo assim no deploy carrego o arquivo client.properties para o diretorio config do kafka
-* nao e um problema mudar o servidor client, apenas nao sera configurado o TLS com a referencia dos brokers e isso impede o teste partindo dele via SSL
-    Pode tambem gerar manualmente o certificado.
+    **O nome do dominio deve ser o mesmo do arquivo main.yaml do diretorio defaults do ansible**
 
-No caso do consumer pode ser feito os outros servers a fim de validar a configuracao.
+### Configuração inicial: 
 
-kafkainstall.sh - script com as opcoes de configuracao (deploy ja com ssl nos brokers contidos na lista do arquivo hosts)
-    executando o script sem parametro ele retorma um help com as informacoes
+1. Baixar o ansible (rpm) para o servidor
 
------
+2. Importante efetuar a copy das chaves do usuario root para os servidores para conectar via ssh.
+    - No servidor do ansible
+    `# ssh-keygen -f .ssh/kafka`
+    - Copiar as chaves para os servidores do kafka
+    `ssh-copy-id -i ~/.ssh/kafka.pub root@servidores` ou copiar o conteudo da chave e colar no arquivo do servidor destino, `/root/.ssh/authorized_keys`
 
-Caso queira usar o ansible, a automacao possui etapas validadas para parar o deploy, configurar os brokers com SSL, efetuar os testes iniciais no zookeeper
-ja configurado com jmx e plugin para o prometheus, a ref : - mostra os passos para configurar o prometheus afim de monitorar a jvm e tambem o respectivo server.
+3. O arquivo inventory, possui a lista dos brokers do client e scale_out 
+    - Adicionar igual ao exemplo do arquivo.
+    - **O padrão da POC contém 3 brokers com 1 partição: fator de replicação: 3 com o topicname: POC**
+    - O scale_out foi um teste de como funciona o crescimento horizontal no kafka ingressando outras maquinas ao cluster, e possivel adicionar quantas máquinas quiser na lista, respeitando a ordem da tag myid para criar o auto scale da infra do zookeeper
 
+4. Variaveis de execucao
 
-O ansible possui o diretorio defaults e nele o arquivo main.yaml com as variaveis setadas para o deploy, e possivel configurar a particao, replicacao e o nome do topico.
+    - Diretorio defauls, possui o arquivo com as variaveis criadas no ansible, o nome do dominio no inventario tem que ser o mesmo, o meu caso labdomain.corp
 
-Importante que o etc/hosts dos servidores estejam configurados a automacao foi feita com o nome 
-    kafka1.labdomain.corp
-    kafka2.labdomain.corp
-    kafka3.labdomain.corp
+### Execução do testes:
 
-lembrar de setar o hostname para tudo funcionar.
+1. Para executar o ansible executar o script shell com o nome `kafkainstall.sh`, rode sem opção que ele mostra as opções.
 
-o comando hostnamectl set-hostname kafka1.labdomain.corp
+    Opções: 
+        `sh kafkainstall.sh deploy` -> instala o kafka com certificado (servidores da lista do \[broker]\)
+        `sh kafkainstall.sh remove` -> remove tudo (remove todos relacionado a zookeeper e a tibico)
+        `sh kafkainstall.sh scale_out` -> cria uma outra instancia do kafka em outro servidor na lista do inventario \[scale_out\] 
+        `sh kafkainstall.sh restart` -> systemctl restart zookeeper e kafka
+
+    Se quiser um modo debug rodar o script e adicionar o -vv ou -vvv ao final do comando

@@ -15,21 +15,21 @@ child.sendline('BR')
 child.expect('State or Province Name')
 child.sendline('SP')
 child.expect('Locality Name')
-child.sendline('Sao Paulo')
+child.sendline('SP')
 child.expect('Organization Name')
-child.sendline('LAB')
+child.sendline('{{ domain }}')
 child.expect('Organizational Unit Name')
 child.sendline('POC')
 child.expect('Common Name')
 child.sendline('*.{{ domain }}')
 child.expect('Email Address')
-child.sendline('')
+child.sendline('research@{{ domain }}')
 child.expect(pexpect.EOF)
 
 print("\t b) Adicionar ao truststore do Client, para confiarem na CA")
 
 child = pexpect.spawn(
-    'keytool -keystore client.truststore.jks -alias CARoot -import -file ca-cert')
+    'keytool -keystore client.truststore.jks -alias caroot -import -file ca-cert')
 child.expect('Enter keystore password')
 child.sendline('{{ passcert }}')
 child.expect('Re-enter new password')
@@ -41,7 +41,7 @@ child.expect(pexpect.EOF)
 print("\t c) Para os brokers confiarem nos Clients, adicionar as CAs que assinarem os certificados dos clientes. Neste caso a CA e a mesma")
 
 child = pexpect.spawn(
-    'keytool -keystore server.truststore.jks -alias CARoot -import -file ca-cert')
+    'keytool -keystore server.truststore.jks -alias caroot -import -file ca-cert')
 child.expect('Enter keystore password')
 child.sendline('{{ passcert }}')
 child.expect('Re-enter new password')
@@ -53,6 +53,13 @@ child.expect(pexpect.EOF)
 
 print("\nGeracao dos certificados de cada broker\n")
 
+#{% set server_broker = [] %}
+#{% for broker in groups['kafka'] %}
+#{{ server_broker.append("DNS:"+broker) }}
+#{% endfor %}
+#child = pexpect.spawn(
+#    'keytool -keystore server.keystore.jks -alias localhost -validity 365 -genkey -keyalg RSA -ext \
+#        SAN={{ server_broker|join(',') }}')
 child = pexpect.spawn('keytool -keystore server.keystore.jks -alias localhost -validity 365 -genkey -keyalg RSA')
 child.expect('Enter keystore password')
 child.sendline('{{ passcert }}')
@@ -63,9 +70,9 @@ child.sendline('*.{{ domain }}')
 child.expect('What is the name of your organizational unit')
 child.sendline('POC')
 child.expect('What is the name of your organization')
-child.sendline('LAB')
+child.sendline('{{ domain }}')
 child.expect('What is the name of your City or Locality')
-child.sendline('Sao Paulo')
+child.sendline('SP')
 child.expect('What is the name of your State or Province')
 child.sendline('SP')
 child.expect('What is the two-letter country code for this unit')
@@ -89,24 +96,25 @@ child.expect(pexpect.EOF)
 print("\t b) Assinar com a CA")
 os.system('openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days 365 -CAcreateserial -passin pass:{{ passcert }}')
 
-print("\t c) Importar certificado da CA para o keystore")
-child = pexpect.spawn('keytool -keystore server.keystore.jks -alias CARoot -import -file ca-cert')
+print("\n\t c) Importar certificado da CA para o keystore")
+child = pexpect.spawn('keytool -keystore server.keystore.jks -alias caroot -import -file ca-cert')
 child.expect('Enter keystore password')
 child.sendline('{{ passcert }}')
 child.expect('Trust this certificate')
 child.sendline('yes')
 child.expect(pexpect.EOF)
 
-print("\n\t d) Importar o certificado de volta, agora assinado pela CA")
-child = pexpect.spawn('keytool -keystore server.keystore.jks -alias localhost -import -file cert-signed')
-child.expect('Enter keystore password')
-child.sendline('{{ passcert }}')
-child.expect(pexpect.EOF)
-
 print("\nAssinatura do certificado do cliente pela CA\n")
 
 print("\t a) Geracao do certificado do cliente")
 
+#{% set server_client = [] %}
+#{% for client in groups['client'] %}
+#{{ server_client.append( "DNS:"+client ) }}
+#{% endfor %}
+#child = pexpect.spawn(
+#    'keytool -keystore client.keystore.jks -alias localhost -validity 365 -genkey -keyalg RSA -ext \
+#        SAN={{ server_client|join(',') }}')
 child = pexpect.spawn('keytool -keystore client.keystore.jks -alias localhost -validity 365 -genkey -keyalg RSA')
 child.expect('Enter keystore password')
 child.sendline('{{ passcert }}')
@@ -117,9 +125,9 @@ child.sendline('*.{{ domain }}')
 child.expect('What is the name of your organizational unit')
 child.sendline('POC')
 child.expect('What is the name of your organization')
-child.sendline('LAB')
+child.sendline('{{ domain }}')
 child.expect('What is the name of your City or Locality')
-child.sendline('Sao Paulo')
+child.sendline('SP')
 child.expect('What is the name of your State or Province')
 child.sendline('SP')
 child.expect('What is the two-letter country code for this unit')
@@ -144,7 +152,7 @@ os.system('openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file-client -out
 
 print("\n\t d) Importar certificado da CA para o keystore")
 
-child = pexpect.spawn('keytool -keystore client.keystore.jks -alias CARoot -import -file ca-cert')
+child = pexpect.spawn('keytool -keystore client.keystore.jks -alias caroot -import -file ca-cert')
 child.expect('Enter keystore password')
 child.sendline('{{ passcert }}')
 child.expect('Trust this certificate')

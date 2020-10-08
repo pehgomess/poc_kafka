@@ -15,21 +15,27 @@
 
 - name: Generate Cert 
   become: true
-  command: python createcert.py
+  shell: "(python createcert.py >/dev/null 2>&1 &)"
   args:
     chdir: "{{ certdir_create }}"
-  async: 5
+  async: 10
   poll: 0
   register: out
   when: inventory_hostname in groups['kafka'][0]
 
-- debug: var=out.stdout_lines
-  when: inventory_hostname in groups['kafka'][0]
-  
+#- debug: var=out.stdout_lines
+#  when: inventory_hostname in groups['kafka'][0]
+
 - name: Aguardando a execucao do Certificado
   pause:  
-#    seconds: 5
-  
+    seconds: 10
+
+- name: Wait until ok.cert
+  wait_for:
+    path: /tmp/certs/ok.cert
+    state: present
+  when: inventory_hostname in groups['kafka'][0]
+
 - name: tar cert
   archive:
     path: "{{ certdir_create }}"
