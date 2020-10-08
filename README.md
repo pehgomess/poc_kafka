@@ -11,11 +11,12 @@ Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do re
     
 - Importante que as maquinas possuem entradas no hosts, adicionar o dominio tambem para a POC.
 
-    Ex arquivo /etc/hosts. 
-    `127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4`
-    `IP-NODE1	kafka1.labdomain.corp`
-    `IP-NODE2	kafka2.labdomain.corp`
-    `IP-NODE3	kafka3.labdomain.corp`
+    - Ex arquivo /etc/hosts. 
+    
+    127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+    IP-NODE1	kafka1.labdomain.corp
+    IP-NODE2	kafka2.labdomain.corp
+    IP-NODE3	kafka3.labdomain.corp
 
     **O nome do dominio deve ser o mesmo do arquivo main.yaml do diretorio defaults do ansible**
 
