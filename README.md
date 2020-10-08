@@ -46,8 +46,11 @@ Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do re
     - Opções: 
         
         `sh kafkainstall.sh deploy` -> instala o kafka com certificado (servidores da lista do \[broker]\)
+
         `sh kafkainstall.sh remove` -> remove tudo (remove todos relacionado a zookeeper e a tibico)
+
         `sh kafkainstall.sh scale_out` -> cria uma outra instancia do kafka em outro servidor na lista do inventario \[scale_out\] 
+        
         `sh kafkainstall.sh restart` -> systemctl restart zookeeper e kafka
 
     **Se quiser um modo debug rodar o script e adicionar o -vv ou -vvv ao final do comando**
