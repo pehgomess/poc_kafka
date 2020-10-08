@@ -18,7 +18,7 @@ Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do re
     IP-NODE2	kafka2.labdomain.corp
     IP-NODE3	kafka3.labdomain.corp
     ```
-    **O nome do dominio deve ser o mesmo do arquivo main.yaml do diretorio [defaults](deploy_kafkatibco/defaults) do ansible**
+    **O nome do dominio deve ser o mesmo do arquivo main.yaml do diretorio [defaults](roles/deploy_kafkatibco/defaults) do ansible**
 
 ### Configuração inicial: 
 
@@ -44,7 +44,7 @@ Na POC foi usado o openjdk1.8 a instalação e feita via ansible e precisa do re
 1. Para executar o ansible executar o script shell com o nome `kafkainstall.sh`, rode sem opção que ele mostra as opções.
 
     - Opções: 
-    
+
         ```
         sh kafkainstall.sh deploy -> instala o kafka com certificado (servidores da lista do \[broker]\)
 
